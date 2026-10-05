@@ -6,8 +6,7 @@ const path = require('path');
 // Build a dynamic person dictionary from actual photo data
 function getPersonNames() {
   try {
-    const filePath = path.join(__dirname, '../data/samplePhotos.json');
-    const photos = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const photos = require('../data/samplePhotos.json');
     const names = new Set();
     photos.forEach(p => {
       if (p.people) p.people.forEach(name => names.add(name.toLowerCase()));
@@ -21,8 +20,7 @@ function getPersonNames() {
 // Build a dynamic location dictionary from actual photo data
 function getLocationLabels() {
   try {
-    const filePath = path.join(__dirname, '../data/samplePhotos.json');
-    const photos = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const photos = require('../data/samplePhotos.json');
     const locations = new Set();
     photos.forEach(p => {
       if (p.location?.label) locations.add(p.location.label.toLowerCase());

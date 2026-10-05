@@ -3,8 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 function getSamplePhotos() {
-  const filePath = path.join(__dirname, '../data/samplePhotos.json');
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  return require('../data/samplePhotos.json');
 }
 
 // Helper: Levenshtein distance for fuzzy spelling match
