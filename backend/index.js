@@ -22,7 +22,7 @@ app.get('/health', (req, res) => {
 });
 
 // Start local server if running locally
-if (process.env.NODE_ENV !== 'production') {
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Backend server running on port ${PORT}`);
   });

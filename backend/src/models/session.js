@@ -68,8 +68,9 @@ function getActiveSessions(userId) {
 
 // Phase 4: Session Expiry + Cleanup (T8.4)
 // Run every hour in production; runs immediately here for simulation
-setInterval(() => {
-  const now = Date.now();
+if (!process.env.VERCEL) {
+  setInterval(() => {
+    const now = Date.now();
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
   for (const [id, session] of sessions.entries()) {
     const sessionTime = new Date(session.updated_at || session.created_at).getTime();
@@ -79,6 +80,7 @@ setInterval(() => {
     }
   }
 }, 60 * 60 * 1000);
+}
 
 module.exports = {
   createSession,
