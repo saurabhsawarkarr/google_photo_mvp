@@ -1,11 +1,11 @@
 // src/models/session.js
-const { v4: uuidv4 } = require('uuid'); // Need to install uuid
+const crypto = require('crypto');
 
 // In-memory session store for MVP
 const sessions = new Map();
 
 function createSession(userId, initialClues) {
-  const sessionId = uuidv4();
+  const sessionId = crypto.randomUUID();
   const session = {
     session_id: sessionId,
     user_id: userId,
