@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": "24.x"
+    "node": "20.x"
   },
   "scripts": {
     "start": "node index.js",
@@ -20,6 +20,6 @@
     "express": "^5.2.1",
     "firebase-admin": "^14.5.0",
     "firebase-functions": "^7.4.0",
-    "uuid": "^14.0.2"
+    "uuid": "^11.0.0"
   }
 }
