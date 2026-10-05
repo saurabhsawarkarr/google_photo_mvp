@@ -1,0 +1,924 @@
+[
+  {
+    "photo_id": "p5",
+    "url": "/photos/mountain/mountain_5.jpg",
+    "people": [],
+    "location": {
+      "label": "Mountain",
+      "type": "mountain"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2023
+    },
+    "scene": "A vast snow-covered mountain landscape with a solitary figure trekking through deep snow",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "light blue"
+      ]
+    },
+    "objects": [
+      "mountain",
+      "snow",
+      "winter",
+      "landscape",
+      "walking",
+      "person",
+      "trekking",
+      "cold",
+      "footprints",
+      "expedition",
+      "solitude",
+      "ice",
+      "peaks",
+      "alpine",
+      "frozen",
+      "nature"
+    ]
+  },
+  {
+    "photo_id": "p21",
+    "url": "/photos/sports/sports_1.jpg",
+    "people": [
+      "Amit"
+    ],
+    "location": {
+      "label": "Sports",
+      "type": "sports"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2022
+    },
+    "scene": "Boys playing street cricket with a bat and red ball",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "green",
+        "brown",
+        "blue"
+      ]
+    },
+    "objects": [
+      "cricket",
+      "boys",
+      "playing",
+      "street cricket",
+      "dusty field",
+      "bat",
+      "red ball",
+      "bricks",
+      "wicket",
+      "sports",
+      "outdoor",
+      "daytime"
+    ]
+  },
+  {
+    "photo_id": "p2",
+    "url": "/photos/mountain/mountain_2.jpg",
+    "people": [],
+    "location": {
+      "label": "Mountain",
+      "type": "mountain"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2023
+    },
+    "scene": "Tourists dining outside a cozy rustic mountain chalet with huge mountains and a glacier behind it",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "light blue"
+      ]
+    },
+    "objects": [
+      "mountain",
+      "cafe",
+      "chalet",
+      "restaurant",
+      "people",
+      "tourists",
+      "dining",
+      "outdoor seating",
+      "food",
+      "vacation",
+      "holiday",
+      "snow",
+      "glacier",
+      "alps",
+      "pine trees",
+      "relaxing",
+      "summer"
+    ]
+  },
+  {
+    "photo_id": "p18",
+    "url": "/photos/office/office_3.jpg",
+    "people": [],
+    "location": {
+      "label": "Office",
+      "type": "office"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2024
+    },
+    "scene": "Empty office desk with a laptop, coffee cup, and notebook",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "light blue"
+      ]
+    },
+    "objects": [
+      "office",
+      "desk",
+      "empty desk",
+      "laptop",
+      "coffee cup",
+      "notebook",
+      "workspace",
+      "productivity",
+      "work from home"
+    ]
+  },
+  {
+    "photo_id": "p8",
+    "url": "/photos/beach/beach_3.jpg",
+    "people": [],
+    "location": {
+      "label": "Beach",
+      "type": "beach"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2024
+    },
+    "scene": "Tropical white sand beach with leaning palm trees and clear blue water",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "blue",
+        "cyan",
+        "tan"
+      ]
+    },
+    "objects": [
+      "beach",
+      "tropical",
+      "palm trees",
+      "white sand",
+      "ocean",
+      "clear water",
+      "nature",
+      "paradise",
+      "island",
+      "resort",
+      "vacation",
+      "holiday",
+      "relaxing",
+      "summer",
+      "sunshine",
+      "exotic",
+      "turquoise"
+    ]
+  },
+  {
+    "photo_id": "p1",
+    "url": "/photos/mountain/mountain_1.jpg",
+    "people": [],
+    "location": {
+      "label": "Mountain",
+      "type": "mountain"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2022
+    },
+    "scene": "A mountain bike parked on an alpine trail overlooking a valley and snow-capped peaks",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "light blue"
+      ]
+    },
+    "objects": [
+      "mountain",
+      "bicycle",
+      "mountain bike",
+      "trail",
+      "alps",
+      "nature",
+      "valley",
+      "summer",
+      "sports",
+      "outdoors",
+      "greenery",
+      "clouds",
+      "scenic",
+      "adventure"
+    ]
+  },
+  {
+    "photo_id": "p16",
+    "url": "/photos/office/office_1.jpg",
+    "people": [
+      "Priya"
+    ],
+    "location": {
+      "label": "Office",
+      "type": "office"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2022
+    },
+    "scene": "Modern open plan office with people working at computers",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "light blue"
+      ]
+    },
+    "objects": [
+      "office",
+      "working",
+      "open plan",
+      "computers",
+      "desks",
+      "colleagues",
+      "technology",
+      "business",
+      "modern"
+    ]
+  },
+  {
+    "photo_id": "p25",
+    "url": "/photos/sports/sports_5.jpg",
+    "people": [
+      "Vikram"
+    ],
+    "location": {
+      "label": "Sports",
+      "type": "sports"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2023
+    },
+    "scene": "People working out in a gym with kettlebell and battle ropes",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "gray"
+      ]
+    },
+    "objects": [
+      "gym",
+      "workout",
+      "fitness",
+      "squats",
+      "kettlebell",
+      "battle ropes",
+      "bear crawl",
+      "turf",
+      "exercise",
+      "sports",
+      "indoor",
+      "training",
+      "strength"
+    ]
+  },
+  {
+    "photo_id": "p3",
+    "url": "/photos/mountain/mountain_3.jpg",
+    "people": [],
+    "location": {
+      "label": "Mountain",
+      "type": "mountain"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2024
+    },
+    "scene": "A wooden cabin by a serene blue alpine lake, surrounded by pine trees, wildflowers, and mountains",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "green",
+        "brown",
+        "blue"
+      ]
+    },
+    "objects": [
+      "mountain",
+      "cabin",
+      "house",
+      "lake",
+      "water",
+      "pine trees",
+      "forest",
+      "nature",
+      "wildflowers",
+      "path",
+      "peaceful",
+      "serene",
+      "remote",
+      "summer",
+      "greenery"
+    ]
+  },
+  {
+    "photo_id": "p7",
+    "url": "/photos/beach/beach_2.jpg",
+    "people": [],
+    "location": {
+      "label": "Beach",
+      "type": "beach"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2023
+    },
+    "scene": "Scenic empty beach with crashing waves and a palm tree-covered cliff in the distance",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "blue",
+        "cyan",
+        "tan"
+      ]
+    },
+    "objects": [
+      "beach",
+      "waves",
+      "ocean",
+      "sand",
+      "cliff",
+      "palm trees",
+      "nature",
+      "landscape",
+      "scenic",
+      "peaceful",
+      "surf",
+      "coastline",
+      "summer",
+      "travel",
+      "destination"
+    ]
+  },
+  {
+    "photo_id": "p13",
+    "url": "/photos/school/school_3.jpg",
+    "people": [
+      "Rahul"
+    ],
+    "location": {
+      "label": "School",
+      "type": "school"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2024
+    },
+    "scene": "Children playing on a school playground during recess",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "gray",
+        "beige"
+      ]
+    },
+    "objects": [
+      "school",
+      "playground",
+      "children",
+      "kids",
+      "playing",
+      "recess",
+      "slide",
+      "fun",
+      "outdoors"
+    ]
+  },
+  {
+    "photo_id": "p22",
+    "url": "/photos/sports/sports_2.jpg",
+    "people": [
+      "Priya"
+    ],
+    "location": {
+      "label": "Sports",
+      "type": "sports"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2023
+    },
+    "scene": "Girl batting while playing cricket on a dusty field",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "gray"
+      ]
+    },
+    "objects": [
+      "cricket",
+      "girl",
+      "batting",
+      "tennis ball",
+      "spectators",
+      "sports",
+      "outdoor",
+      "field",
+      "daytime",
+      "active",
+      "blue shirt",
+      "red pants"
+    ]
+  },
+  {
+    "photo_id": "p4",
+    "url": "/photos/mountain/mountain_4.jpg",
+    "people": [],
+    "location": {
+      "label": "Mountain",
+      "type": "mountain"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2022
+    },
+    "scene": "A hiker with a backpack standing on a ridge, looking out at a stunning panoramic view of jagged snow-capped mountains",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "light blue"
+      ]
+    },
+    "objects": [
+      "mountain",
+      "person",
+      "hiker",
+      "backpack",
+      "standing",
+      "view",
+      "ridge",
+      "path",
+      "hiking",
+      "trekking",
+      "adventure",
+      "panoramic",
+      "majestic",
+      "alps",
+      "valley",
+      "outdoors"
+    ]
+  },
+  {
+    "photo_id": "p14",
+    "url": "/photos/school/school_4.jpg",
+    "people": [],
+    "location": {
+      "label": "School",
+      "type": "school"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2022
+    },
+    "scene": "Teacher writing on a chalkboard in front of students",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "gray"
+      ]
+    },
+    "objects": [
+      "school",
+      "teacher",
+      "chalkboard",
+      "writing",
+      "students",
+      "learning",
+      "classroom",
+      "education",
+      "chemistry",
+      "science"
+    ]
+  },
+  {
+    "photo_id": "p19",
+    "url": "/photos/office/office_4.jpg",
+    "people": [
+      "Vikram"
+    ],
+    "location": {
+      "label": "Office",
+      "type": "office"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2022
+    },
+    "scene": "A bright office breakroom with employees chatting over coffee",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "light blue"
+      ]
+    },
+    "objects": [
+      "office",
+      "breakroom",
+      "coffee",
+      "chatting",
+      "employees",
+      "coworkers",
+      "relaxing",
+      "kitchen",
+      "modern"
+    ]
+  },
+  {
+    "photo_id": "p10",
+    "url": "/photos/beach/beach_5.jpg",
+    "people": [],
+    "location": {
+      "label": "Beach",
+      "type": "beach"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2023
+    },
+    "scene": "Silhouettes of an adult and child riding bicycles on the beach at sunset",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "orange",
+        "red",
+        "yellow"
+      ]
+    },
+    "objects": [
+      "beach",
+      "sunset",
+      "silhouette",
+      "bicycles",
+      "riding",
+      "people",
+      "parent",
+      "child",
+      "evening",
+      "dusk",
+      "golden hour",
+      "family",
+      "bonding",
+      "active",
+      "leisure",
+      "cycling",
+      "coast"
+    ]
+  },
+  {
+    "photo_id": "p17",
+    "url": "/photos/office/office_2.jpg",
+    "people": [
+      "Amit"
+    ],
+    "location": {
+      "label": "Office",
+      "type": "office"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2023
+    },
+    "scene": "Business meeting in a glass conference room",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "gray",
+        "beige"
+      ]
+    },
+    "objects": [
+      "office",
+      "meeting",
+      "conference room",
+      "glass",
+      "business",
+      "presentation",
+      "colleagues",
+      "corporate",
+      "teamwork"
+    ]
+  },
+  {
+    "photo_id": "p24",
+    "url": "/photos/sports/sports_4.jpg",
+    "people": [
+      "Sneha"
+    ],
+    "location": {
+      "label": "Sports",
+      "type": "sports"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2022
+    },
+    "scene": "Women running and jogging on a path in a green park",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "green",
+        "brown",
+        "blue"
+      ]
+    },
+    "objects": [
+      "running",
+      "jogging",
+      "women",
+      "park",
+      "trees",
+      "fitness",
+      "exercise",
+      "sports",
+      "outdoor",
+      "smartwatch",
+      "activewear",
+      "health"
+    ]
+  },
+  {
+    "photo_id": "p11",
+    "url": "/photos/school/school_1.jpg",
+    "people": [
+      "Sneha"
+    ],
+    "location": {
+      "label": "School",
+      "type": "school"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2022
+    },
+    "scene": "Students sitting at desks in a bright classroom",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "gray",
+        "beige"
+      ]
+    },
+    "objects": [
+      "school",
+      "classroom",
+      "students",
+      "desks",
+      "studying",
+      "education",
+      "learning",
+      "bright",
+      "teacher"
+    ]
+  },
+  {
+    "photo_id": "p6",
+    "url": "/photos/beach/beach_1.jpg",
+    "people": [],
+    "location": {
+      "label": "Beach",
+      "type": "beach"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2022
+    },
+    "scene": "Man standing on the beach looking out at the ocean",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "blue",
+        "cyan",
+        "tan"
+      ]
+    },
+    "objects": [
+      "beach",
+      "man",
+      "person",
+      "standing",
+      "ocean",
+      "hat",
+      "blue shirt",
+      "summer",
+      "vacation",
+      "looking away",
+      "horizon",
+      "blue sky",
+      "sunny",
+      "coast",
+      "shoreline"
+    ]
+  },
+  {
+    "photo_id": "p20",
+    "url": "/photos/office/office_5.jpg",
+    "people": [
+      "Amit"
+    ],
+    "location": {
+      "label": "Office",
+      "type": "office"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2023
+    },
+    "scene": "A creative team brainstorming at a white board in a colorful office",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "light blue"
+      ]
+    },
+    "objects": [
+      "office",
+      "brainstorming",
+      "whiteboard",
+      "creative",
+      "team",
+      "startup",
+      "colorful",
+      "working",
+      "planning"
+    ]
+  },
+  {
+    "photo_id": "p23",
+    "url": "/photos/sports/sports_3.jpg",
+    "people": [
+      "Rahul"
+    ],
+    "location": {
+      "label": "Sports",
+      "type": "sports"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2024
+    },
+    "scene": "Child playing soccer and kicking a ball on a grass field",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "green",
+        "brown",
+        "blue"
+      ]
+    },
+    "objects": [
+      "soccer",
+      "football",
+      "child",
+      "kicking",
+      "ball",
+      "grass field",
+      "outdoor",
+      "sports",
+      "blue sky",
+      "active",
+      "playing"
+    ]
+  },
+  {
+    "photo_id": "p9",
+    "url": "/photos/beach/beach_4.jpg",
+    "people": [
+      "Vikram"
+    ],
+    "location": {
+      "label": "Beach",
+      "type": "beach"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2022
+    },
+    "scene": "Men playing a competitive game of beach volleyball on the sand",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "blue",
+        "cyan",
+        "tan"
+      ]
+    },
+    "objects": [
+      "beach",
+      "volleyball",
+      "sports",
+      "people",
+      "playing",
+      "sand",
+      "net",
+      "ball",
+      "summer",
+      "active",
+      "fitness",
+      "team",
+      "match",
+      "jumping",
+      "athletic",
+      "outdoor",
+      "recreation"
+    ]
+  },
+  {
+    "photo_id": "p15",
+    "url": "/photos/school/school_5.jpg",
+    "people": [],
+    "location": {
+      "label": "School",
+      "type": "school"
+    },
+    "timestamp": {
+      "season": "summer",
+      "year": 2023
+    },
+    "scene": "Students walking down a school hallway with lockers",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "white",
+        "gray",
+        "beige"
+      ]
+    },
+    "objects": [
+      "school",
+      "hallway",
+      "lockers",
+      "students",
+      "walking",
+      "teenagers",
+      "backpacks",
+      "high school",
+      "friends"
+    ]
+  },
+  {
+    "photo_id": "p12",
+    "url": "/photos/school/school_2.jpg",
+    "people": [],
+    "location": {
+      "label": "School",
+      "type": "school"
+    },
+    "timestamp": {
+      "season": "winter",
+      "year": 2023
+    },
+    "scene": "Yellow school bus parked in front of a brick school building",
+    "visual_attributes": {
+      "composition": "wide",
+      "dominant_colors": [
+        "green",
+        "brown",
+        "blue"
+      ]
+    },
+    "objects": [
+      "school",
+      "bus",
+      "yellow bus",
+      "brick building",
+      "education",
+      "transportation",
+      "trees",
+      "fall"
+    ]
+  }
+]

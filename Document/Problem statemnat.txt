@@ -1,0 +1,192 @@
+# Updated Problem Statement — Progressive Memory-Based Search Refinement
+
+## One-line Problem
+
+> **Finding a specific photo is rarely a one-query problem, but users don't have a clear way to turn the additional clues they remember into the next useful search step.**
+
+---
+
+## The Situation
+
+When users try to find a specific photo, they often start with only part of what they remember.
+
+For example:
+
+> **“Sunflower with a bee sitting on it”**
+
+The search may return a large set of relevant photos.
+
+The user may then realize:
+
+> “I think it was taken at a farm.”
+> “My sister was there.”
+> “It was during monsoon.”
+> “It was a close-up photo.”
+
+These additional memories can help narrow the search, but the user has to figure out **what to search next and how to express it**.
+
+This creates a gap between the user's evolving memory and the search experience.
+
+---
+
+## What Our Research Shows
+
+Our research found that users remember photos through different dimensions, including **location, people, objects/visual details, activities and time**. In our interviews, users experienced situations where combining additional details did not always improve retrieval.
+
+For example:
+
+* Resham wanted a **front-facing Ganpati decoration** but received a similar photo from the wrong angle.
+* Pritish found relevant results for **“Prachi Vakhre bill”**, but adding a specific date caused the search to fail.
+* Naina successfully retrieved a photo using multiple contextual details such as **clothing + location**, showing that multi-dimensional natural-language search can work in some cases.
+
+This means the problem is **not simply that Google Photos cannot understand natural language**. The issue is that users cannot reliably predict which combination of remembered details will produce useful results. 
+
+---
+
+# The Core Problem
+
+### Users have more memory than their initial search contains.
+
+After seeing the first results, users may remember additional information that could help:
+
+```text
+Initial memory
+     ↓
+"I remember a sunflower with a bee"
+     ↓
+Search
+     ↓
+Many / incomplete / close results
+     ↓
+User remembers more
+     ↓
+"It was probably at a farm"
+     ↓
+"It was during monsoon"
+     ↓
+"My sister was there"
+```
+
+The problem is that **the search experience does not consistently turn these newly surfaced memories into clear, actionable refinement steps.**
+
+Instead, the user has to decide:
+
+> **What should I add?**
+
+and
+
+> **How should I phrase it?**
+
+---
+
+# Why This Creates a Dead End
+
+Our discovery research identified **search recovery as a recurring failure point**:
+
+* 54 of 111 analyzed journeys involved a search-recovery failure (**48.6%**)
+* 54 of 111 ended in abandonment (**48.6%**)
+* Result relevance issues appeared in 46 journeys (**41.4%**) 
+
+These figures describe the analyzed discovery corpus and should not be treated as population estimates.
+
+The important point is:
+
+> **When the first search is not enough, users often have no clear indication of what information would be most useful to add next.**
+
+---
+
+# The Opportunity
+
+Instead of making users restart or invent another query, the search experience can become **progressive and adaptive**.
+
+After the initial search, the system can:
+
+### 1. Show what it understood
+
+> **I understood**
+>
+> 🌻 Sunflower
+> 🐝 Bee
+
+### 2. Keep those clues selected
+
+The user doesn't need to enter them again.
+
+### 3. Recognize that the current results are still broad or insufficient
+
+> **I found 200 photos**
+
+### 4. Ask:
+
+> **What else do you remember?**
+
+And provide additional relevant dimensions:
+
+**Who** · **Where** · **When** · **What happened** · **What did it look like?**
+
+### 5. Let the user progressively narrow the results
+
+```text
+200 photos
+     ↓
++ Farm
+     ↓
+42 photos
+     ↓
++ Monsoon
+     ↓
+12 photos
+     ↓
++ Sister
+     ↓
+4 photos
+     ↓
+Photo found
+```
+
+---
+
+# The Product Problem We Are Solving
+
+> **When users search for a specific photo from incomplete or evolving memory, they may have additional clues that could help retrieve it, but they lack a clear and adaptive way to understand what the system already knows and add the next useful clue without restarting the search.**
+
+---
+
+# Target User
+
+Our primary target is the **Power Searcher segment**, which represents approximately **31.5% of the analyzed discovery corpus**. These users actively try multiple searches and use contextual details such as people, places, activities and visual characteristics to retrieve a specific photo. 
+
+The solution is particularly relevant when:
+
+* the user knows the photo exists
+* the initial search produces many or close-but-not-exact results
+* the user remembers additional contextual or visual clues
+* the user is willing to continue searching but doesn't know what to try next
+
+---
+
+# Desired Product Outcome
+
+The primary outcome is:
+
+> **Increase successful retrieval of specific photos from incomplete or evolving memories.**
+
+We can measure this through:
+
+* **Retrieval success rate**
+* **Time to retrieve the target photo**
+* **Search abandonment after the initial search**
+* **Percentage of users who use at least one refinement**
+* **Number of search attempts required to retrieve the photo**
+
+---
+
+## The Core Insight
+
+The simplest way to explain the entire problem is:
+
+> **The user remembers more after they see the results, but the search experience doesn't help them turn that new memory into the next useful clue.**
+
+And therefore our solution is:
+
+> **Show what the system already understood, then help the user add the next useful piece of memory to progressively narrow the search.**
