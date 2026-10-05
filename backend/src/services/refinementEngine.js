@@ -2,8 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 
+const samplePhotos = require('../data/samplePhotos.json');
+
 function getSamplePhotos() {
-  return require('../data/samplePhotos.json');
+  return samplePhotos;
 }
 
 const ALL_DIMENSIONS = [

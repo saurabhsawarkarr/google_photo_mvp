@@ -2,11 +2,12 @@
 
 const fs = require('fs');
 const path = require('path');
+const photos = require('../data/samplePhotos.json');
 
 // Build a dynamic person dictionary from actual photo data
 function getPersonNames() {
   try {
-    const photos = require('../data/samplePhotos.json');
+    // photos already required at top level
     const names = new Set();
     photos.forEach(p => {
       if (p.people) p.people.forEach(name => names.add(name.toLowerCase()));
@@ -20,7 +21,7 @@ function getPersonNames() {
 // Build a dynamic location dictionary from actual photo data
 function getLocationLabels() {
   try {
-    const photos = require('../data/samplePhotos.json');
+    // photos already required at top level
     const locations = new Set();
     photos.forEach(p => {
       if (p.location?.label) locations.add(p.location.label.toLowerCase());

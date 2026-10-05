@@ -28,5 +28,11 @@ if (!process.env.VERCEL) {
   });
 }
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("Global Error:", err);
+  res.status(500).json({ error: err.message, stack: err.stack });
+});
+
 // Export the Express API for Vercel
 module.exports = app;
