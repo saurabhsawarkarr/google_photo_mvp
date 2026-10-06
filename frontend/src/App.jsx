@@ -49,12 +49,23 @@ function App() {
   const [allPhotos, setAllPhotos] = useState([])
   const [selectedPhoto, setSelectedPhoto] = useState(null)
 
+  const fixUrls = (res) => {
+    if (res?.results?.photos) {
+      res.results.photos = res.results.photos.map(p => ({
+        ...p,
+        url: import.meta.env.BASE_URL + (p.url.startsWith('/') ? p.url.slice(1) : p.url)
+      }));
+    }
+    return res;
+  }
+
   // Fetch all photos initially
   useEffect(() => {
     const init = async () => {
-      const res = await search('')
+      let res = await search('')
+      res = fixUrls(res)
       setSession(res)
-      setAllPhotos(res.results.photos || [])
+      setAllPhotos(res.results?.photos || [])
     }
     init()
   }, [])
@@ -84,6 +95,7 @@ function App() {
       } else {
         res = await search(query)
       }
+      res = fixUrls(res)
       setSession(res)
       setActiveDimension(null)
       setIsRefineScreenOpen(false)
@@ -95,7 +107,8 @@ function App() {
   const handleRemoveClue = async (clueId) => {
     setLoading(true)
     try {
-      const res = await removeClue(session.session_id, clueId)
+      let res = await removeClue(session.session_id, clueId)
+      res = fixUrls(res)
       setSession(res)
     } catch (err) { console.error(err) } finally { setLoading(false) }
   }
@@ -124,6 +137,7 @@ function App() {
         setZeroResultWarning(null)
       }
 
+      res = fixUrls(res)
       setSession(res)
       setRefineInput('')
       setActiveDimension(null)
@@ -142,7 +156,7 @@ function App() {
   const exitSearchMode = () => {
     setIsSearchMode(false)
     setIsRefineScreenOpen(false)
-    search('').then(res => setSession(res))
+    search('').then(res => setSession(fixUrls(res)))
     setQuery('')
     setStagedClues([])
   }
@@ -269,7 +283,8 @@ function App() {
       setIsRefineScreenOpen(false);
       setLoading(true);
       try {
-        const res = await search(text);
+        let res = await search(text);
+        res = fixUrls(res);
         setSession(res);
         setActiveDimension(null);
       } catch(err) { console.error(err) } finally { setLoading(false) }
