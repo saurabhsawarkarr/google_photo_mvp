@@ -71,12 +71,13 @@ function fallbackParseQuery(query) {
       const termLower = term.toLowerCase();
       if (lowerQuery.includes(termLower) && !matchedTerms.has(termLower)) {
         // Check it's a word boundary match (not a substring of another word)
-        const regex = new RegExp(`\\b${termLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-        if (regex.test(lowerQuery)) {
+        const regex = new RegExp(`\\b${termLower.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\b`, 'i');
+        const match = query.match(regex);
+        if (match) {
           clues.push({
             clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
             dimension: dimension,
-            value: term,
+            value: dimension === 'person' && match[0] ? match[0] : term,
             confidence: 0.9,
             active: true,
             added_at: new Date().toISOString()
@@ -89,14 +90,37 @@ function fallbackParseQuery(query) {
   });
 
   if (!matched) {
-    clues.push({
-      clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-      dimension: 'object',
-      value: lowerQuery,
-      confidence: 0.5,
-      active: true,
-      added_at: new Date().toISOString()
+    const originalWords = query.trim().split(/[\\s,]+/);
+    let properNounAdded = false;
+    
+    originalWords.forEach(word => {
+      if (word.length > 1 && word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
+        const wordLower = word.toLowerCase();
+        if (!matchedTerms.has(wordLower)) {
+          clues.push({
+            clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+            dimension: 'person',
+            value: word, // Preserve original case for UI display
+            confidence: 0.4,
+            active: true,
+            added_at: new Date().toISOString()
+          });
+          matchedTerms.add(wordLower);
+          properNounAdded = true;
+        }
+      }
     });
+
+    if (!properNounAdded) {
+      clues.push({
+        clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+        dimension: 'object',
+        value: lowerQuery,
+        confidence: 0.5,
+        active: true,
+        added_at: new Date().toISOString()
+      });
+    }
   }
 
   return clues;
@@ -147,8 +171,9 @@ function fallbackParseClue(clueText, dimensionHint) {
 
 async function parseQuery(query) {
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    console.log("No GROQ_API_KEY found. Falling back to dictionary parser.");
+  const isValidKey = apiKey && apiKey.startsWith('gsk_');
+  if (!isValidKey) {
+    console.log("No valid GROQ_API_KEY found. Falling back to dictionary parser.");
     return fallbackParseQuery(query);
   }
 
@@ -180,7 +205,7 @@ User query: "${query}"`;
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: "openai/gpt-oss-20b",
+        model: "llama-3.1-8b-instant",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.1,
         response_format: { type: "json_object" }
@@ -219,7 +244,8 @@ User query: "${query}"`;
 
 async function parseClue(clueText, dimensionHint) {
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return fallbackParseClue(clueText, dimensionHint);
+  const isValidKey = apiKey && apiKey.startsWith('gsk_');
+  if (!isValidKey) return fallbackParseClue(clueText, dimensionHint);
 
   const clues = await parseQuery(clueText);
   if (clues && clues.length > 0) {

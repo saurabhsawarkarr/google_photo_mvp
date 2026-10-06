@@ -1,4 +1,4 @@
-const { searchPhotos } = require('./src/services/searchService');
+const { searchPhotos } = require('../src/services/searchService');
 
 const clues = [
   { dimension: 'location', value: 'beach', active: true },

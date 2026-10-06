@@ -9,8 +9,22 @@ const { createSession } = require('../models/session');
 router.post('/', async (req, res, next) => {
   try {
     const { query, user_id } = req.body;
-    if (query === undefined) {
+    if (query === undefined || query === null) {
       return res.status(400).json({ error: 'Query is required' });
+    }
+    if (typeof query !== 'string' || query.length > 500) {
+      return res.status(400).json({ error: 'Query must be a string under 500 characters' });
+    }
+
+    if (!query.trim()) {
+      const { photos, count } = searchPhotos([]);
+      return res.json({
+        session_id: null,
+        understanding: { clues: [] },
+        results: { photos, relaxed_photos: [], total_count: count },
+        suggestions: { dimensions: [] },
+        refinement_history: []
+      });
     }
 
     // 1. Parse initial query
@@ -32,6 +46,7 @@ router.post('/', async (req, res, next) => {
 
     res.json({
       session_id: session.session_id,
+      refinement_history: session.refinement_history,
       understanding: {
         clues: session.clues
       },

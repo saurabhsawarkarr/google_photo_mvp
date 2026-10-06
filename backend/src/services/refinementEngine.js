@@ -1,6 +1,4 @@
 // src/services/refinementEngine.js
-const fs = require('fs');
-const path = require('path');
 
 const samplePhotos = require('../data/samplePhotos.json');
 
@@ -188,9 +186,22 @@ function getSuggestions(session, currentPhotos = []) {
       .map(entry => entry.display)
       .slice(0, 6);
 
+    // Calculate coverage for estimated reduction
+    const coverageCount = pool.filter(photo => {
+      if (dim.key === 'person') return photo.people?.length > 0;
+      if (dim.key === 'location') return !!photo.location?.label;
+      if (dim.key === 'time') return !!photo.timestamp;
+      if (dim.key === 'activity') return (photo.objects || []).some(obj => ACTIVITY_KEYWORDS.has(obj.toLowerCase()));
+      if (dim.key === 'visual') return (photo.visual_attributes?.dominant_colors || []).length > 0;
+      if (dim.key === 'object') return (photo.objects || []).some(obj => KNOWN_OBJECTS.has(obj.toLowerCase()));
+      return false;
+    }).length;
+    
+    const estimated_reduction = pool.length > 0 ? coverageCount / pool.length : 0;
+
     return {
       ...dim,
-      estimated_reduction: Math.random() * 0.5 + 0.3,
+      estimated_reduction: estimated_reduction,
       suggested_values: sortedValues
     };
   });
@@ -201,7 +212,7 @@ function getSuggestions(session, currentPhotos = []) {
     const bUsed = usedDimensions.includes(b.key);
     if (aUsed && !bUsed) return 1;
     if (!aUsed && bUsed) return -1;
-    return b.estimated_reduction - a.estimated_reduction;
+    return a.estimated_reduction - b.estimated_reduction;
   });
 
   return {

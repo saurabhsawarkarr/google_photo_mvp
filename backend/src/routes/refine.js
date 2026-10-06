@@ -6,12 +6,17 @@ const { getSuggestions } = require('../services/refinementEngine');
 const { getSession, addRefinementStep } = require('../models/session');
 
 // POST /api/session/:id/refine
-router.post('/:id/refine', async (req, res) => {
-  const sessionId = req.params.id;
-  const { new_clue_text, dimension_hint } = req.body;
-  
-  const session = getSession(sessionId);
-  if (!session) return res.status(404).json({ error: 'Session not found' });
+router.post('/:id/refine', async (req, res, next) => {
+  try {
+    const sessionId = req.params.id;
+    const { new_clue_text, dimension_hint } = req.body;
+    
+    if (!new_clue_text || typeof new_clue_text !== 'string' || new_clue_text.length > 200) {
+      return res.status(400).json({ error: 'Valid new_clue_text string is required' });
+    }
+    
+    const session = getSession(sessionId);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
 
   // 1. Parse the new clue
   const newClue = await parseClue(new_clue_text, dimension_hint);
@@ -47,7 +52,18 @@ router.post('/:id/refine', async (req, res) => {
   // 3. Re-search
   const { photos, count, relaxed_photos } = searchPhotos(updatedClues);
 
-
+  // 4. Zero-result protection
+  if (count === 0 && !alreadyActive) {
+    const prevResults = searchPhotos(session.clues);
+    return res.json({
+      session_id: session.session_id,
+      zero_results: true,
+      rejected_clue: finalClue,
+      understanding: { clues: session.clues },
+      results: { photos: prevResults.photos, relaxed_photos: prevResults.relaxed_photos, total_count: prevResults.count },
+      suggestions: getSuggestions(session, prevResults.photos)
+    });
+  }
 
   // 5. Update session
   addRefinementStep(sessionId, updatedClues, count);
@@ -58,8 +74,9 @@ router.post('/:id/refine', async (req, res) => {
 
   res.json({
     session_id: session.session_id,
+    refinement_history: session.refinement_history,
     understanding: {
-      clues: session.clues,
+      clues: updatedClues,
       new_clue_parsed: finalClue
     },
     results: {
@@ -69,15 +86,19 @@ router.post('/:id/refine', async (req, res) => {
     },
     suggestions
   });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // DELETE /api/session/:id/clue/:clue_id
-router.delete('/:id/clue/:clue_id', (req, res) => {
-  const sessionId = req.params.id;
-  const clueId = req.params.clue_id;
-  
-  const session = getSession(sessionId);
-  if (!session) return res.status(404).json({ error: 'Session not found' });
+router.delete('/:id/clue/:clue_id', async (req, res, next) => {
+  try {
+    const sessionId = req.params.id;
+    const clueId = req.params.clue_id;
+    
+    const session = getSession(sessionId);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
 
   // 1. Remove/deactivate clue
   const removedClue = session.clues.find(c => c.clue_id === clueId);
@@ -97,11 +118,15 @@ router.delete('/:id/clue/:clue_id', (req, res) => {
 
   res.json({
     session_id: session.session_id,
-    understanding: { clues: session.clues },
+    refinement_history: session.refinement_history,
+    understanding: { clues: updatedClues },
     removed_clue: removedClue,
     results: { photos, relaxed_photos, total_count: count },
     suggestions
   });
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;

@@ -1,5 +1,5 @@
-require('dotenv').config();
-const { parseQuery } = require('./src/services/queryUnderstanding');
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+const { parseQuery } = require('../src/services/queryUnderstanding');
 
 async function test() {
   console.log("Using API Key:", process.env.GROQ_API_KEY ? "YES" : "NO");

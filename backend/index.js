@@ -1,4 +1,4 @@
-
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
@@ -9,7 +9,10 @@ const sessionRoutes = require('./src/routes/session');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://google-photo-mvp.onrender.com'],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE']
+}));
 app.use(express.json());
 
 // Routes
@@ -21,18 +24,18 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error("Global Error:", err);
+  res.status(500).json({ error: err.message });
+});
+
 // Start local server if running locally
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Backend server running on port ${PORT}`);
   });
 }
-
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error("Global Error:", err);
-  res.status(500).json({ error: err.message, stack: err.stack });
-});
 
 // Export the Express API for Vercel
 module.exports = app;

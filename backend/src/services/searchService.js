@@ -171,27 +171,39 @@ function searchPhotos(clues) {
   const totalClues = activeClues.length;
   console.log(`[searchPhotos] activeClues: ${JSON.stringify(activeClues.map(c => c.value))} (total: ${totalClues})`);
 
+  // Group clues by dimension
+  const cluesByDimension = {};
+  for (const clue of activeClues) {
+    const dim = clue.dimension || 'unknown';
+    if (!cluesByDimension[dim]) cluesByDimension[dim] = [];
+    cluesByDimension[dim].push(clue);
+  }
+  const totalDimensions = Object.keys(cluesByDimension).length;
+
   const scoredPhotos = samplePhotos.map(photo => {
-    let cluesMatched = 0;
+    let dimsMatched = 0;
     let totalQuality = 0;
 
-    for (const clue of activeClues) {
-      const q = matchClueOnPhoto(clue, photo);
-      if (q > 0) {
-        cluesMatched++;
-        totalQuality += q;
+    for (const dim of Object.keys(cluesByDimension)) {
+      const dimClues = cluesByDimension[dim];
+      let bestScoreForDim = 0;
+      for (const clue of dimClues) {
+        const q = matchClueOnPhoto(clue, photo);
+        if (q > bestScoreForDim) bestScoreForDim = q;
+      }
+      if (bestScoreForDim > 0) {
+        dimsMatched++;
+        totalQuality += bestScoreForDim;
       }
     }
 
     let match_percentage = 0;
-    if (cluesMatched === totalClues) {
-      // Full exact match: score between 86% and 99%
-      const avgQ = totalQuality / totalClues;
+    if (dimsMatched === totalDimensions) {
+      const avgQ = totalQuality / totalDimensions;
       match_percentage = Math.min(99, Math.max(86, Math.round(84 + (avgQ * 14))));
-    } else if (cluesMatched > 0) {
-      // Partial / relaxed match: score between 38% and 75%
-      const ratio = cluesMatched / totalClues;
-      const avgQ = totalQuality / cluesMatched;
+    } else if (dimsMatched > 0) {
+      const ratio = dimsMatched / totalDimensions;
+      const avgQ = totalQuality / dimsMatched;
       match_percentage = Math.min(75, Math.max(38, Math.round((ratio * 50) + (avgQ * 20))));
     }
 
@@ -202,20 +214,18 @@ function searchPhotos(clues) {
       match_score
     };
 
-    return { photo: enrichedPhoto, cluesMatched, match_percentage };
+    return { photo: enrichedPhoto, dimsMatched, match_percentage };
   });
 
-  // Only photos matching ALL active clues are exact matches
-  const exactMatches = scoredPhotos.filter(p => p.cluesMatched === totalClues);
+  const exactMatches = scoredPhotos.filter(p => p.dimsMatched === totalDimensions);
   exactMatches.sort((a, b) => b.match_percentage - a.match_percentage);
   const results = exactMatches.map(p => p.photo);
   console.log(`[searchPhotos] exactMatches count: ${results.length}`);
 
-  // Relaxed matches (photos matching at least one clue) when no exact matches exist
   let relaxedResults = [];
-  if (results.length === 0 && totalClues > 1) {
-    const relaxedMatches = scoredPhotos.filter(p => p.cluesMatched > 0);
-    relaxedMatches.sort((a, b) => b.cluesMatched - a.cluesMatched || b.match_percentage - a.match_percentage);
+  if (results.length === 0 && totalDimensions > 1) {
+    const relaxedMatches = scoredPhotos.filter(p => p.dimsMatched > 0);
+    relaxedMatches.sort((a, b) => b.dimsMatched - a.dimsMatched || b.match_percentage - a.match_percentage);
     relaxedResults = relaxedMatches.map(p => p.photo);
   }
 

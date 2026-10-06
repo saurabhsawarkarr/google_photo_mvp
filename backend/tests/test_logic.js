@@ -1,6 +1,6 @@
-require('dotenv').config();
-const { parseQuery } = require('./src/services/queryUnderstanding');
-const { searchPhotos } = require('./src/services/searchService');
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+const { parseQuery } = require('../src/services/queryUnderstanding');
+const { searchPhotos } = require('../src/services/searchService');
 
 async function test() {
   const clues = await parseQuery("College");

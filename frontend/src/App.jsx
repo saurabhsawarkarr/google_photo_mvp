@@ -1060,6 +1060,25 @@ function App() {
       <main style={{ paddingBottom: isRefineScreenOpen ? '75vh' : '24px', display: 'block', transition: 'padding-bottom 0.3s' }}>
         {loading && <div style={{textAlign: 'center', marginTop: '40px'}}><Loader2 className="animate-spin" size={32} /></div>}
         
+        {hasActiveSearch && session?.refinement_history?.length > 1 && (
+          <div className="narrowing-path" style={{ padding: '0 20px 16px 20px', fontSize: '13px', color: '#5f6368', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+            {session.refinement_history.map((step, i) => {
+              const activeClues = step.clues_state.filter(c => c.active);
+              const lastClue = activeClues[activeClues.length - 1];
+              const label = i === 0 
+                ? (activeClues.length > 0 ? `Search: "${activeClues[0]?.value || 'All'}"` : 'All photos')
+                : `+ ${lastClue?.value || 'Filter'}`;
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{label}</span>
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>→ {step.result_count}</span>
+                  {i < session.refinement_history.length - 1 && <span style={{ opacity: 0.5 }}>•</span>}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {session && !loading && session.results.photos.length > 0 && (
           <div className="photo-grid">
             {session.results.photos.map(photo => (
