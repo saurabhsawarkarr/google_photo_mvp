@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://google-photo-mvp.onrender.com'],
+  origin: ['http://localhost:5173', 'https://google-photo-mvp.onrender.com', 'https://photos-mvp.web.app', 'https://photos-mvp.firebaseapp.com'],
   methods: ['GET', 'POST', 'PATCH', 'DELETE']
 }));
 app.use(express.json());
