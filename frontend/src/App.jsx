@@ -62,10 +62,17 @@ function App() {
   // Fetch all photos initially
   useEffect(() => {
     const init = async () => {
-      let res = await search('')
-      res = fixUrls(res)
-      setSession(res)
-      setAllPhotos(res.results?.photos || [])
+      setLoading(true)
+      try {
+        let res = await search('')
+        res = fixUrls(res)
+        setSession(res)
+        setAllPhotos(res.results?.photos || [])
+      } catch (err) {
+        console.error("Failed to load initial photos:", err)
+      } finally {
+        setLoading(false)
+      }
     }
     init()
   }, [])
