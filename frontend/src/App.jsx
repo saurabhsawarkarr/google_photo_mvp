@@ -431,7 +431,7 @@ function App() {
           <ArrowLeft size={22} />
         </button>
         <div className="header-title-area">
-          <div className="search-input-wrapper">
+          <form className="search-input-wrapper" onSubmit={handleSearch}>
             <div className="search-left-icon">
               <Search size={19} />
             </div>
@@ -442,12 +442,12 @@ function App() {
               placeholder="Search or ask photos"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSearch(e)}
             />
             <div className="search-actions-cluster">
               {query.trim().length > 0 && (
                 <>
                   <button 
+                    type="button"
                     className="search-action-btn"
                     onClick={() => {
                       setQuery('');
@@ -458,8 +458,8 @@ function App() {
                     <X size={18} />
                   </button>
                   <button 
+                    type="submit"
                     className="search-action-btn search-submit-btn"
-                    onClick={handleSearch}
                     title="Search"
                   >
                     <Search size={18} />
@@ -467,6 +467,7 @@ function App() {
                 </>
               )}
               <button 
+                type="button"
                 className={`search-action-btn ${isRefineScreenOpen ? 'filter-active' : ''}`}
                 onClick={async () => {
                   if (query.trim()) {
@@ -479,7 +480,7 @@ function App() {
                 <SlidersHorizontal size={18} />
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </header>
 
