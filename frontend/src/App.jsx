@@ -48,33 +48,69 @@ function App() {
   const [activeTab, setActiveTab] = useState('photos')
   const [allPhotos, setAllPhotos] = useState([])
   const [selectedPhoto, setSelectedPhoto] = useState(null)
+  const [serverWakingUp, setServerWakingUp] = useState(false)
+
+  const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+    const base = import.meta.env.BASE_URL || '/';
+    if (url.startsWith(base)) {
+      return url;
+    }
+    return base + (url.startsWith('/') ? url.slice(1) : url);
+  }
 
   const fixUrls = (res) => {
+    if (!res) return res;
     if (res?.results?.photos) {
       res.results.photos = res.results.photos.map(p => ({
         ...p,
-        url: import.meta.env.BASE_URL + (p.url.startsWith('/') ? p.url.slice(1) : p.url)
+        url: getImageUrl(p.url)
+      }));
+    }
+    if (res?.results?.relaxed_photos) {
+      res.results.relaxed_photos = res.results.relaxed_photos.map(p => ({
+        ...p,
+        url: getImageUrl(p.url)
       }));
     }
     return res;
   }
 
-  // Fetch all photos initially
+  // Detect when cloud server is spinning up (free-tier cold start)
   useEffect(() => {
+    let timer;
+    if (loading) {
+      timer = setTimeout(() => {
+        setServerWakingUp(true);
+      }, 3500);
+    } else {
+      setServerWakingUp(false);
+    }
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  // Fetch all photos initially with race-condition guard
+  useEffect(() => {
+    let isMounted = true;
     const init = async () => {
       setLoading(true)
       try {
         let res = await search('')
+        if (!isMounted) return;
         res = fixUrls(res)
-        setSession(res)
+        setSession(prev => (prev && prev.session_id) ? prev : res)
         setAllPhotos(res.results?.photos || [])
       } catch (err) {
         console.error("Failed to load initial photos:", err)
       } finally {
-        setLoading(false)
+        if (isMounted) setLoading(false)
       }
     }
     init()
+    return () => { isMounted = false; }
   }, [])
 
   const activeClues = session?.understanding?.clues?.filter(c => c.active) || []
@@ -125,7 +161,7 @@ function App() {
     if (!clueToRefine && !refineInput.trim()) return
     setLoading(true)
     try {
-      const res = await refineSession(
+      let res = await refineSession(
         session.session_id, 
         clueToRefine || refineInput, 
         dimHint || (activeDimension ? activeDimension.key : null)
@@ -184,7 +220,7 @@ function App() {
           </div>
         )}
         <img 
-          src={selectedPhoto.url} 
+          src={getImageUrl(selectedPhoto.url)} 
           alt="Preview" 
           className="photo-preview-image" 
         />
@@ -305,17 +341,17 @@ function App() {
               <div className="memories-carousel">
                 <div className="memory-card">
                   <div className="memory-overlay"></div>
-                  {allPhotos.length > 0 && <img src={allPhotos[0].url} alt="" />}
+                  {allPhotos.length > 0 && <img src={getImageUrl(allPhotos[0].url)} alt="" />}
                   <div className="memory-title">Featured scenes<br/><span>Sep – Nov 2024</span></div>
                 </div>
                 <div className="memory-card">
                   <div className="memory-overlay"></div>
-                  {allPhotos.length > 1 && <img src={allPhotos[allPhotos.length - 1].url} alt="" />}
+                  {allPhotos.length > 1 && <img src={getImageUrl(allPhotos[allPhotos.length - 1].url)} alt="" />}
                   <div className="memory-title">Best of<br/>October 2021</div>
                 </div>
                 <div className="memory-card">
                   <div className="memory-overlay"></div>
-                  {allPhotos.length > 2 && <img src={allPhotos[2].url} alt="" />}
+                  {allPhotos.length > 2 && <img src={getImageUrl(allPhotos[2].url)} alt="" />}
                   <div className="memory-title">Nagpur<br/><span>Over the years</span></div>
                 </div>
               </div>
@@ -325,7 +361,7 @@ function App() {
                 <div className="photo-grid">
                   {allPhotos.map(photo => (
                     <div key={photo.photo_id} className="photo-card" onClick={() => setSelectedPhoto(photo)}>
-                      <img src={photo.url} alt="Photo" />
+                      <img src={getImageUrl(photo.url)} alt="Photo" />
                     </div>
                   ))}
                 </div>
@@ -337,7 +373,7 @@ function App() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '20px' }}>
                 {collectionsData.map((c, i) => (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => triggerSearch(c.name)}>
-                    <img src={c.images[0]?.url} alt={c.name} style={{ width: '80px', height: '80px', objectFit: 'cover', objectPosition: 'center 15%', borderRadius: '50%', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
+                    <img src={getImageUrl(c.images[0]?.url)} alt={c.name} style={{ width: '80px', height: '80px', objectFit: 'cover', objectPosition: 'center 15%', borderRadius: '50%', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
                     <span style={{ fontWeight: '500', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center' }}>{c.name}</span>
                   </div>
                 ))}
@@ -761,7 +797,7 @@ function App() {
                           <Check size={11} color="#ffffff" strokeWidth={3} />
                         </div>
                       )}
-                      <img src={dateObj.preview} alt={dateObj.label} />
+                      <img src={getImageUrl(dateObj.preview)} alt={dateObj.label} />
                       <div className="date-card-label">
                         {dateObj.label}<br/>
                         <span style={{ color: selected ? '#0a56d9' : '#5f6368', fontWeight: selected ? '600' : '400' }}>
@@ -959,7 +995,7 @@ function App() {
                                 <Check size={11} color="#ffffff" strokeWidth={3} />
                               </div>
                             )}
-                            <img src={previewUrl} style={{height: '70px', objectFit: 'cover'}} alt={s} />
+                            <img src={getImageUrl(previewUrl)} style={{height: '70px', objectFit: 'cover'}} alt={s} />
                             <div className="date-card-label" style={{padding: '6px 4px', fontSize: '13px'}}>
                               {s}<br/>
                               <span style={{ fontSize: '11px', color: isCardSelected ? '#0a56d9' : '#5f6368', fontWeight: isCardSelected ? '600' : '400' }}>
@@ -1045,7 +1081,7 @@ function App() {
                 let res = session;
                 
                 if (query.trim()) {
-                  if (hasActiveSearch) {
+                  if (hasActiveSearch && res?.session_id) {
                     res = await refineSession(res.session_id, query.trim());
                   } else {
                     res = await search(query.trim());
@@ -1053,14 +1089,20 @@ function App() {
                   setQuery('');
                 }
                 for (const clue of finalStaged) {
-                  res = await refineSession(res.session_id, clue.text, clue.dimension);
+                  if (!res?.session_id) {
+                    res = await search(clue.text);
+                  } else {
+                    res = await refineSession(res.session_id, clue.text, clue.dimension);
+                  }
                   if (res.disambiguation_required) {
                     setDisambiguation({ alternatives: res.alternatives, text: clue.text });
+                    res = fixUrls(res);
                     setSession(res);
                     setLoading(false);
                     return;
                   }
                 }
+                res = fixUrls(res);
                 setSession(res);
                 setStagedClues([]);
                 setRefineInput('');
@@ -1080,7 +1122,17 @@ function App() {
     )}
 
       <main style={{ paddingBottom: isRefineScreenOpen ? '75vh' : '24px', display: 'block', transition: 'padding-bottom 0.3s' }}>
-        {loading && <div style={{textAlign: 'center', marginTop: '40px'}}><Loader2 className="animate-spin" size={32} /></div>}
+        {loading && (
+          <div style={{ textAlign: 'center', marginTop: '40px', padding: '0 20px' }}>
+            <Loader2 className="animate-spin" size={32} style={{ margin: '0 auto 12px auto', color: '#1a73e8' }} />
+            {serverWakingUp && (
+              <div style={{ fontSize: '13px', color: '#5f6368', background: '#f1f3f4', padding: '10px 16px', borderRadius: '12px', display: 'inline-block', maxWidth: '420px', lineHeight: '1.4' }}>
+                <p style={{ margin: 0, fontWeight: '600', color: '#1f2937' }}>⚡ Connecting to backend server...</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '12px', opacity: 0.85 }}>Render free tier cloud instance spins down after inactivity. Waking up may take 30–50s on initial start.</p>
+              </div>
+            )}
+          </div>
+        )}
         
         {hasActiveSearch && session?.refinement_history?.length > 1 && (
           <div className="narrowing-path" style={{ padding: '0 20px 16px 20px', fontSize: '13px', color: '#5f6368', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
@@ -1105,7 +1157,7 @@ function App() {
           <div className="photo-grid">
             {session.results.photos.map(photo => (
               <div key={photo.photo_id} className="photo-card" onClick={() => setSelectedPhoto(photo)}>
-                <img src={photo.url} alt="Photo" />
+                <img src={getImageUrl(photo.url)} alt="Photo" />
                 {hasActiveSearch && photo.match_percentage != null && (
                   <div 
                     className={`match-badge ${photo.match_percentage >= 90 ? 'match-high' : photo.match_percentage >= 75 ? 'match-med' : 'match-low'}`}
@@ -1127,7 +1179,7 @@ function App() {
             <div className="photo-grid">
               {session.results.relaxed_photos.map(photo => (
                 <div key={photo.photo_id} className="photo-card" onClick={() => setSelectedPhoto(photo)}>
-                  <img src={photo.url} alt="Photo" />
+                  <img src={getImageUrl(photo.url)} alt="Photo" />
                   {photo.match_percentage != null && (
                     <div 
                       className="match-badge match-relaxed"
