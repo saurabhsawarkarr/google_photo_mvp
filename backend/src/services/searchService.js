@@ -27,11 +27,31 @@ function levenshtein(a, b) {
   return matrix[b.length][a.length];
 }
 
+function stemWord(w) {
+  if (!w || w.length <= 3) return w;
+  const lower = w.toLowerCase();
+  if (lower.endsWith('ies')) return lower.slice(0, -3) + 'y';
+  if (lower.endsWith('es')) {
+    if (lower.endsWith('ches') || lower.endsWith('shes') || lower.endsWith('sses') || lower.endsWith('xes')) {
+      return lower.slice(0, -2);
+    }
+    return lower.slice(0, -1);
+  }
+  if (lower.endsWith('s') && !lower.endsWith('ss')) return lower.slice(0, -1);
+  if (lower.endsWith('ing')) return lower.slice(0, -3);
+  return lower;
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // Clean synonym map for precise matching
 const SYNONYM_MAP = {
   sea: ['sea', 'ocean'],
   ocean: ['sea', 'ocean'],
-  beach: ['beach', 'seashore', 'coast', 'coastline'],
+  beach: ['beach', 'beaches', 'seashore', 'coast', 'coastline'],
+  beaches: ['beach', 'beaches', 'seashore', 'coast', 'coastline'],
   coast: ['coast', 'beach', 'seashore', 'shore'],
   goa: ['goa', 'beach'],
   mountain: ['mountain', 'mountains', 'peak', 'ridge', 'alpine'],
@@ -73,11 +93,23 @@ const SYNONYM_MAP = {
   meeting: ['meeting', 'conference room', 'presentation'],
   work: ['work', 'working', 'office'],
   working: ['working', 'work', 'office'],
+  shirt: ['shirt', 'shirts', 'blue shirt', 't-shirt'],
+  shirts: ['shirt', 'shirts', 'blue shirt', 't-shirt'],
+  tree: ['tree', 'trees', 'palm trees', 'pine trees'],
+  trees: ['tree', 'trees', 'palm trees', 'pine trees'],
+  man: ['man', 'men', 'person'],
+  men: ['men', 'man', 'people', 'person'],
+  women: ['women', 'woman', 'people'],
+  woman: ['woman', 'women', 'person']
 };
 
 function getSynonyms(word) {
   const w = word.toLowerCase();
-  return SYNONYM_MAP[w] || [w];
+  const stem = stemWord(w);
+  const syns = new Set([w, stem]);
+  (SYNONYM_MAP[w] || []).forEach(s => syns.add(s));
+  (SYNONYM_MAP[stem] || []).forEach(s => syns.add(s));
+  return Array.from(syns);
 }
 
 function matchClueOnPhoto(clue, photo) {
@@ -85,18 +117,17 @@ function matchClueOnPhoto(clue, photo) {
   const val = clue.value.toLowerCase().trim();
   if (!val) return 0;
 
-  const synonyms = getSynonyms(val);
   const words = val.split(/[\s,]+/).filter(w => w.length > 1);
-
-  let bestScore = 0;
 
   const checkFields = [];
   if (dim === 'person') {
     checkFields.push({ texts: photo.people || [], weight: 1.0 });
     checkFields.push({ texts: [photo.scene], weight: 0.85 });
+    checkFields.push({ texts: photo.objects || [], weight: 0.8 });
   } else if (dim === 'location') {
     checkFields.push({ texts: [photo.location?.label, photo.location?.type].filter(Boolean), weight: 1.0 });
     checkFields.push({ texts: [photo.scene], weight: 0.85 });
+    checkFields.push({ texts: photo.objects || [], weight: 0.8 });
   } else if (dim === 'time') {
     checkFields.push({ texts: [photo.timestamp?.season, String(photo.timestamp?.year)].filter(Boolean), weight: 1.0 });
     checkFields.push({ texts: [photo.scene], weight: 0.85 });
@@ -106,9 +137,11 @@ function matchClueOnPhoto(clue, photo) {
   } else if (dim === 'visual') {
     checkFields.push({ texts: photo.visual_attributes?.dominant_colors || [], weight: 1.0 });
     checkFields.push({ texts: [photo.visual_attributes?.composition, photo.scene].filter(Boolean), weight: 0.85 });
+    checkFields.push({ texts: photo.objects || [], weight: 0.8 });
   } else if (dim === 'object') {
     checkFields.push({ texts: photo.objects || [], weight: 1.0 });
     checkFields.push({ texts: [photo.scene], weight: 0.85 });
+    checkFields.push({ texts: photo.visual_attributes?.dominant_colors || [], weight: 0.8 });
   } else {
     checkFields.push({ texts: photo.people || [], weight: 1.0 });
     checkFields.push({ texts: [photo.location?.label, photo.location?.type].filter(Boolean), weight: 1.0 });
@@ -118,16 +151,46 @@ function matchClueOnPhoto(clue, photo) {
     checkFields.push({ texts: photo.visual_attributes?.dominant_colors || [], weight: 0.85 });
   }
 
-  const candidateTerms = new Set([val, ...synonyms]);
-  for (const w of words) {
-    candidateTerms.add(w);
-    getSynonyms(w).forEach(s => candidateTerms.add(s));
+  // Combined text across all check fields
+  const allTexts = checkFields.flatMap(f => f.texts.filter(Boolean).map(t => String(t).toLowerCase()));
+  const combinedText = allTexts.join(' ');
+
+  // Multi-word phrase matching
+  if (words.length > 1) {
+    // 1. Direct whole-phrase match in fields
+    for (const field of checkFields) {
+      for (const t of field.texts) {
+        if (!t) continue;
+        const str = String(t).toLowerCase();
+        if (str.includes(val)) {
+          return field.weight * 1.0;
+        }
+      }
+    }
+
+    // 2. Check if ALL constituent words are present in the combined relevant texts
+    const allWordsPresent = words.every(w => {
+      const syns = getSynonyms(w);
+      return syns.some(s => {
+        const regex = new RegExp('\\b' + escapeRegex(s) + '\\b', 'i');
+        return regex.test(combinedText);
+      });
+    });
+
+    if (allWordsPresent) {
+      return 0.9;
+    }
+    // If not all words are present for a multi-word phrase, do NOT match!
+    return 0;
   }
 
-  for (const term of candidateTerms) {
-    const isExactUserVal = (term === val);
-    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const wordBoundaryRegex = new RegExp(`\\b${escaped}\\b`, 'i');
+  // Single word matching
+  let bestScore = 0;
+  const syns = getSynonyms(val);
+
+  for (const term of syns) {
+    const isExact = (term === val || term === stemWord(val));
+    const wordBoundaryRegex = new RegExp('\\b' + escapeRegex(term) + '\\b', 'i');
 
     for (const field of checkFields) {
       for (const t of field.texts) {
@@ -135,10 +198,10 @@ function matchClueOnPhoto(clue, photo) {
         const str = String(t).toLowerCase();
 
         if (wordBoundaryRegex.test(str)) {
-          let score = field.weight * (isExactUserVal ? 1.0 : 0.92);
+          let score = field.weight * (isExact ? 1.0 : 0.92);
           if (score > bestScore) bestScore = score;
         } else if (str.includes(term) && term.length >= 4) {
-          let score = field.weight * (isExactUserVal ? 0.95 : 0.88);
+          let score = field.weight * (isExact ? 0.95 : 0.88);
           if (score > bestScore) bestScore = score;
         } else if (term.length >= 4) {
           const targetWords = str.split(/[\s,.\-]+/).filter(tw => tw.length >= 3);

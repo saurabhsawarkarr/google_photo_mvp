@@ -4,10 +4,28 @@ const fs = require('fs');
 const path = require('path');
 const photos = require('../data/samplePhotos.json');
 
+function stemWord(w) {
+  if (!w || w.length <= 3) return w;
+  const lower = w.toLowerCase();
+  if (lower.endsWith('ies')) return lower.slice(0, -3) + 'y';
+  if (lower.endsWith('es')) {
+    if (lower.endsWith('ches') || lower.endsWith('shes') || lower.endsWith('sses') || lower.endsWith('xes')) {
+      return lower.slice(0, -2);
+    }
+    return lower.slice(0, -1);
+  }
+  if (lower.endsWith('s') && !lower.endsWith('ss')) return lower.slice(0, -1);
+  if (lower.endsWith('ing')) return lower.slice(0, -3);
+  return lower;
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // Build a dynamic person dictionary from actual photo data
 function getPersonNames() {
   try {
-    // photos already required at top level
     const names = new Set();
     photos.forEach(p => {
       if (p.people) p.people.forEach(name => names.add(name.toLowerCase()));
@@ -21,7 +39,6 @@ function getPersonNames() {
 // Build a dynamic location dictionary from actual photo data
 function getLocationLabels() {
   try {
-    // photos already required at top level
     const locations = new Set();
     photos.forEach(p => {
       if (p.location?.label) locations.add(p.location.label.toLowerCase());
@@ -33,66 +50,92 @@ function getLocationLabels() {
   }
 }
 
+// Build dynamic objects from actual photo data
+function getObjects() {
+  try {
+    const objs = new Set();
+    photos.forEach(p => {
+      if (p.objects) p.objects.forEach(o => objs.add(o.toLowerCase()));
+    });
+    return Array.from(objs);
+  } catch {
+    return [];
+  }
+}
+
 const dictionaries = {
-  person: ['sister', 'brother', 'mom', 'dad', 'friend', 'colleagues', 'teacher', 'students', 'athlete', ...getPersonNames()],
-  location: ['farm', 'office', 'home', 'beach', 'garden', 'mountain', 'school', 'sports', 'gym', 'pool', 'stadium', 'court', 'park', 'forest', 'lake', ...getLocationLabels()],
+  person: ['sister', 'brother', 'mom', 'dad', 'friend', 'friends', 'colleagues', 'teacher', 'students', 'athlete', 'kids', 'children', 'man', 'men', 'women', 'girl', 'boy', 'boys', ...getPersonNames()],
+  location: ['farm', 'office', 'home', 'beach', 'beaches', 'garden', 'mountain', 'mountains', 'school', 'sports', 'gym', 'pool', 'stadium', 'court', 'park', 'forest', 'lake', ...getLocationLabels()],
   time: ['monsoon', 'summer', 'winter', 'spring', 'fall', 'autumn', '2021', '2022', '2023', '2024', '2025'],
-  activity: ['planting trees', 'vacation', 'festival', 'party', 'working', 'meeting', 'studying', 'playing', 'swimming', 'running', 'hiking', 'trekking', 'jogging', 'riding', 'cycling', 'brainstorming', 'dining', 'cricket', 'soccer', 'football', 'volleyball', 'workout'],
-  visual: ['close-up', 'wide', 'front-facing', 'side', 'group', 'red', 'yellow', 'blue', 'green', 'orange', 'gold', 'sunset', 'sunrise', 'golden hour', 'colorful'],
-  object: ['sunflower', 'bee', 'flower', 'tree', 'ganpati', 'statue', 'sand', 'ocean', 'computer', 'desk', 'bus', 'ball', 'bat', 'bicycle', 'bike', 'car', 'laptop', 'phone', 'camera', 'book', 'backpack', 'tent', 'snow', 'cabin', 'chalet', 'whiteboard']
+  activity: ['planting trees', 'vacation', 'festival', 'party', 'working', 'meeting', 'studying', 'playing', 'swimming', 'running', 'hiking', 'trekking', 'jogging', 'riding', 'cycling', 'brainstorming', 'dining', 'cricket', 'soccer', 'football', 'volleyball', 'workout', 'jumping', 'kicking', 'batting'],
+  object: ['shirt', 'shirts', 'blue shirt', 't-shirt', 'pants', 'sunflower', 'bee', 'flower', 'tree', 'trees', 'ganpati', 'statue', 'sand', 'ocean', 'computer', 'desk', 'bus', 'ball', 'bat', 'bicycle', 'bike', 'bicycles', 'car', 'laptop', 'phone', 'camera', 'book', 'backpack', 'tent', 'snow', 'cabin', 'chalet', 'whiteboard', ...getObjects()],
+  visual: ['close-up', 'wide', 'front-facing', 'side', 'group', 'red', 'yellow', 'blue', 'green', 'orange', 'gold', 'sunset', 'sunrise', 'golden hour', 'colorful']
 };
 
-// Deduplicate dictionaries — ensure the same term doesn't appear in multiple dimensions
-// Priority order: person > location > time > activity > visual > object
-const seenTerms = new Set();
-const deduplicatedDictionaries = {};
-for (const dim of ['person', 'location', 'time', 'activity', 'visual', 'object']) {
-  deduplicatedDictionaries[dim] = [];
+// Build all terms sorted by length descending so longer compound terms match first!
+// Dimension priority: person > location > time > activity > object > visual
+const allEntries = [];
+const seenEntries = new Set();
+for (const dim of ['person', 'location', 'time', 'activity', 'object', 'visual']) {
   for (const term of dictionaries[dim]) {
-    const lower = term.toLowerCase();
-    if (!seenTerms.has(lower)) {
-      seenTerms.add(lower);
-      deduplicatedDictionaries[dim].push(term);
+    const lower = term.toLowerCase().trim();
+    if (!seenEntries.has(lower)) {
+      seenEntries.add(lower);
+      allEntries.push({ term: lower, dimension: dim });
     }
   }
 }
+allEntries.sort((a, b) => b.term.length - a.term.length);
 
 function fallbackParseQuery(query) {
   const clues = [];
   const lowerQuery = query.toLowerCase().trim();
-
   if (!lowerQuery) return clues;
 
-  let matched = false;
-  const matchedTerms = new Set(); // avoid duplicate clues for overlapping terms
-  
-  Object.keys(deduplicatedDictionaries).forEach(dimension => {
-    deduplicatedDictionaries[dimension].forEach(term => {
-      const termLower = term.toLowerCase();
-      if (lowerQuery.includes(termLower) && !matchedTerms.has(termLower)) {
-        // Check it's a word boundary match (not a substring of another word)
-        const regex = new RegExp(`\\b${termLower.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\b`, 'i');
-        const match = query.match(regex);
-        if (match) {
-          clues.push({
-            clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-            dimension: dimension,
-            value: dimension === 'person' && match[0] ? match[0] : term,
-            confidence: 0.9,
-            active: true,
-            added_at: new Date().toISOString()
-          });
-          matchedTerms.add(termLower);
-          matched = true;
-        }
-      }
-    });
-  });
+  let workingQuery = lowerQuery;
+  const matchedTerms = new Set();
 
-  if (!matched) {
-    const originalWords = query.trim().split(/[\\s,]+/);
+  for (const entry of allEntries) {
+    const term = entry.term;
+    const regex = new RegExp('\\b' + escapeRegex(term) + '\\b', 'i');
+    if (regex.test(workingQuery)) {
+      clues.push({
+        clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+        dimension: entry.dimension,
+        value: term,
+        confidence: 0.9,
+        active: true,
+        added_at: new Date().toISOString()
+      });
+      matchedTerms.add(term);
+      workingQuery = workingQuery.replace(regex, ' '.repeat(term.length));
+    }
+  }
+
+  // Also check stemmed single words if not matched
+  if (clues.length === 0) {
+    const words = lowerQuery.split(/[\s,]+/).filter(w => w.length > 2);
+    for (const word of words) {
+      const stem = stemWord(word);
+      const matchedEntry = allEntries.find(e => e.term === stem);
+      if (matchedEntry && !matchedTerms.has(matchedEntry.term)) {
+        clues.push({
+          clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+          dimension: matchedEntry.dimension,
+          value: matchedEntry.term,
+          confidence: 0.85,
+          active: true,
+          added_at: new Date().toISOString()
+        });
+        matchedTerms.add(matchedEntry.term);
+      }
+    }
+  }
+
+  if (clues.length === 0) {
+    const originalWords = query.trim().split(/[\s,]+/);
     let properNounAdded = false;
-    
+
     originalWords.forEach(word => {
       if (word.length > 1 && word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
         const wordLower = word.toLowerCase();
@@ -100,7 +143,7 @@ function fallbackParseQuery(query) {
           clues.push({
             clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
             dimension: 'person',
-            value: word, // Preserve original case for UI display
+            value: word,
             confidence: 0.4,
             active: true,
             added_at: new Date().toISOString()
@@ -127,45 +170,59 @@ function fallbackParseQuery(query) {
 }
 
 function fallbackParseClue(clueText, dimensionHint) {
-  const lowerQuery = clueText.toLowerCase().trim();
-  const matches = [];
+  const lower = clueText.toLowerCase().trim();
+  if (!lower) return null;
 
-  for (const dimension of Object.keys(deduplicatedDictionaries)) {
-    for (const term of deduplicatedDictionaries[dimension]) {
-      if (lowerQuery.includes(term.toLowerCase())) {
-        matches.push({
-           clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-           dimension: dimension,
-           value: term,
-           confidence: 0.9,
-           active: true,
-           added_at: new Date().toISOString()
-        });
-      }
-    }
-  }
-  
-  if (matches.length === 1) {
-    return matches[0];
-  } else if (matches.length > 1) {
-    // If we have a dimension hint, pick that one
-    if (dimensionHint) {
-      const hinted = matches.find(m => m.dimension === dimensionHint);
-      if (hinted) return hinted;
-    }
+  if (dimensionHint) {
     return {
-      disambiguation: true,
-      alternatives: matches
+      clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      dimension: dimensionHint,
+      value: lower,
+      confidence: 0.9,
+      active: true,
+      added_at: new Date().toISOString()
     };
   }
-  
+
+  // Find matching entries (longest first)
+  const matchedDimensions = new Set();
+  let primaryDimension = null;
+
+  for (const entry of allEntries) {
+    const regex = new RegExp('\\b' + escapeRegex(entry.term) + '\\b', 'i');
+    if (regex.test(lower)) {
+      if (!primaryDimension) {
+        primaryDimension = entry.dimension;
+      }
+      matchedDimensions.add(entry.dimension);
+    }
+  }
+
+  // If the EXACT word has true ambiguity across different dimensions (e.g., 'cricket')
+  if (matchedDimensions.size > 1) {
+    const exactMatches = allEntries.filter(e => e.term === lower);
+    if (exactMatches.length > 1) {
+      return {
+        disambiguation: true,
+        alternatives: exactMatches.map(m => ({
+          clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+          dimension: m.dimension,
+          value: lower,
+          confidence: 0.9,
+          active: true,
+          added_at: new Date().toISOString()
+        }))
+      };
+    }
+  }
+
   return {
-     clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-     dimension: dimensionHint || 'object',
-     value: lowerQuery,
-     confidence: 0.5,
-     active: true,
-     added_at: new Date().toISOString()
+    clue_id: `clue-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    dimension: primaryDimension || 'object',
+    value: lower,
+    confidence: primaryDimension ? 0.9 : 0.5,
+    active: true,
+    added_at: new Date().toISOString()
   };
 }
 

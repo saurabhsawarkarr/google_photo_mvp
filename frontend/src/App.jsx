@@ -156,38 +156,66 @@ function App() {
     } catch (err) { console.error(err) } finally { setLoading(false) }
   }
 
-  const handleRefine = async (e, clueToRefine, dimHint) => {
-    if (e) e.preventDefault()
-    if (!clueToRefine && !refineInput.trim()) return
-    setLoading(true)
+  const applyRefinements = async (e, extraClue = null) => {
+    if (e) e.preventDefault();
+    let finalStaged = [...stagedClues];
+    if (extraClue && extraClue.text) {
+      finalStaged.push(extraClue);
+    } else if (refineInput.trim()) {
+      finalStaged.push({ text: refineInput.trim(), dimension: activeDimension || null });
+    }
+    
+    if (finalStaged.length === 0 && !query.trim()) {
+      setIsRefineScreenOpen(false);
+      return;
+    }
+    
+    setLoading(true);
     try {
-      let res = await refineSession(
-        session.session_id, 
-        clueToRefine || refineInput, 
-        dimHint || (activeDimension ? activeDimension.key : null)
-      )
+      let res = session;
       
-      if (res.disambiguation_required) {
-        setDisambiguation({ alternatives: res.alternatives, text: refineInput })
-        setLoading(false)
-        return
+      if (query.trim()) {
+        if (hasActiveSearch && res?.session_id) {
+          res = await refineSession(res.session_id, query.trim());
+          if (res.zero_results) {
+            setZeroResultWarning(`Adding '${res.rejected_clue?.value || query.trim()}' removed all results. Kept previous search.`);
+            setTimeout(() => setZeroResultWarning(null), 4000);
+          }
+        } else {
+          res = await search(query.trim());
+        }
+        setQuery('');
       }
-
-      if (res.zero_results) {
-        setZeroResultWarning(`Adding '${res.rejected_clue.value}' removed all results. Kept previous search.`)
-        setTimeout(() => setZeroResultWarning(null), 4000)
-      } else {
-        setZeroResultWarning(null)
+      for (const clue of finalStaged) {
+        if (!res?.session_id) {
+          res = await search(clue.text);
+        } else {
+          res = await refineSession(res.session_id, clue.text, clue.dimension);
+        }
+        if (res.disambiguation_required) {
+          setDisambiguation({ alternatives: res.alternatives, text: clue.text });
+          res = fixUrls(res);
+          setSession(res);
+          setLoading(false);
+          return;
+        }
+        if (res.zero_results) {
+          setZeroResultWarning(`Adding '${res.rejected_clue?.value || clue.text}' removed all results. Kept previous search.`);
+          setTimeout(() => setZeroResultWarning(null), 4000);
+        }
       }
-
-      res = fixUrls(res)
-      setSession(res)
-      setRefineInput('')
-      setActiveDimension(null)
-      setDisambiguation(null)
-      setIsRefineScreenOpen(false)
-    } catch (err) { console.error(err) } finally { setLoading(false) }
-  }
+      res = fixUrls(res);
+      setSession(res);
+      setStagedClues([]);
+      setRefineInput('');
+      setActiveDimension(null);
+      setIsRefineScreenOpen(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleSearchMode = () => {
     setIsSearchMode(true)
@@ -1015,13 +1043,7 @@ function App() {
 
           {/* SEARCH BOX: ALWAYS VISIBLE */}
           <div className="refine-input-container" style={{padding: '8px 24px 16px 24px'}}>
-            <form onSubmit={(e) => { 
-              e.preventDefault(); 
-              if (refineInput.trim()) {
-                toggleStagedClue(refineInput.trim(), activeDimension || null);
-                setRefineInput('');
-              }
-            }} style={{display: 'flex', gap: '8px', width: '100%', alignItems: 'center'}}>
+            <form onSubmit={applyRefinements} style={{display: 'flex', gap: '8px', width: '100%', alignItems: 'center'}}>
               <div style={{flex: 1, position: 'relative', display: 'flex', alignItems: 'center'}}>
                 <Search size={18} color="#5f6368" style={{position: 'absolute', left: '14px', pointerEvents: 'none'}} />
                 <input 
@@ -1065,55 +1087,7 @@ function App() {
           </div>
 
           <div className="refine-bottom-fixed">
-            <button className="update-results-btn-primary" onClick={async (e) => {
-              let finalStaged = [...stagedClues];
-              if (refineInput.trim()) {
-                finalStaged.push({ text: refineInput.trim(), dimension: activeDimension || null });
-              }
-              
-              if (finalStaged.length === 0 && !query.trim()) {
-                setIsRefineScreenOpen(false);
-                return;
-              }
-              
-              setLoading(true);
-              try {
-                let res = session;
-                
-                if (query.trim()) {
-                  if (hasActiveSearch && res?.session_id) {
-                    res = await refineSession(res.session_id, query.trim());
-                  } else {
-                    res = await search(query.trim());
-                  }
-                  setQuery('');
-                }
-                for (const clue of finalStaged) {
-                  if (!res?.session_id) {
-                    res = await search(clue.text);
-                  } else {
-                    res = await refineSession(res.session_id, clue.text, clue.dimension);
-                  }
-                  if (res.disambiguation_required) {
-                    setDisambiguation({ alternatives: res.alternatives, text: clue.text });
-                    res = fixUrls(res);
-                    setSession(res);
-                    setLoading(false);
-                    return;
-                  }
-                }
-                res = fixUrls(res);
-                setSession(res);
-                setStagedClues([]);
-                setRefineInput('');
-                setActiveDimension(null);
-                setIsRefineScreenOpen(false);
-              } catch (err) {
-                console.error(err);
-              } finally {
-                setLoading(false);
-              }
-            }}>
+            <button className="update-results-btn-primary" onClick={applyRefinements}>
               Show results
             </button>
           </div>
